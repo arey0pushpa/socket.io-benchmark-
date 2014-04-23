@@ -73,5 +73,13 @@ io.sockets.on('connection', function(socket) {
 
   socket.on('disconnect', function() {
     users--;
-  })
+   console.log( " \nThe client " + users + " of process id " + process.pid + " is being disconnected . Trying to reconnect shortly. "); 
+  });
+
+process.on('uncaughtException', function (err) {
+  console.error((new Date).toUTCString() + ' uncaughtException:', err.message)
+  console.error(err.stack)
+  process.exit(1)
+});
+
 });
