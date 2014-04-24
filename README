@@ -18,7 +18,14 @@ Instalation:
 1) 'git clone git@github.com:michetti/socket.io-benchmark.git'
 2) on created dir, 'npm install -d'
 3) set ulimit 'ulimit -u <desired ulimit>'
-
+    
+    to check current ulimit "ulimit -n"
+    
+    
+ U need some tweek for the ulimit increase :
+    
+ http://posidev.com/blog/2009/06/04/set-ulimit-parameters-on-ubuntu/
+    
 * set ulimit to increase max number of opened sockets.
 
 Run:
@@ -66,7 +73,6 @@ TODO/Brainstorm:
 *) Make benchmark.js fork new processes to run clients, instead of running the script multiple times.
 *) Use redis store and create several server processes.
 
+Might also use cluster to gain the full processor utilisation. And socket.io clusterhub too.
 
-I'm quite new to node, socket.io and benchmarking. Any help is appreciated.
-
-Tested only with node v0.4.12.
+Tested with node v0.10.15

@@ -1,7 +1,42 @@
+
 var profiler = require('v8-profiler');
 var io = require('socket.io').listen(3000);
 var exec = require('child_process').exec; 
 
+
+var RedisStore = require('socket.io/lib/stores/redis')
+  , redis  = require('socket.io/node_modules/redis')
+  , pub    = redis.createClient()
+  , sub    = redis.createClient()
+  , client = redis.createClient();
+
+io.set('store', new RedisStore({
+  redisPub : pub
+, redisSub : sub
+, redisClient : client
+}));
+
+
+var io = require('socket.io').listen(80);
+
+io.configure('production', function(){
+  io.enable('browser client etag');
+  io.set('log level', 1);
+
+  io.set('transports', [
+    'websocket'
+  , 'flashsocket'
+  , 'htmlfile'
+  , 'xhr-polling'
+  , 'jsonp-polling'
+  ]);
+});
+
+io.configure('development', function(){
+  io.set('transports', ['websocket']);
+});
+
+/*
 io.configure(function() {
   io.set('log level', 1);
 
@@ -10,6 +45,8 @@ io.configure(function() {
     io.set('transports', [transport]);
   }
 });
+*/
+
 
 // command to read process consumed memory and cpu time
 var getCpuCommand = "ps -p " + process.pid + " -u | grep " + process.pid;
@@ -75,6 +112,17 @@ io.sockets.on('connection', function(socket) {
     users--;
    console.log( " \nThe client " + users + " of process id " + process.pid + " is being disconnected . Trying to reconnect shortly. "); 
   });
+
+socket.on('error',  function (err) {
+  if (err && err.advice) {
+    if (err.advice === 'reconnect' && this.connected) {
+      this.disconnect();
+      this.reconnect();
+    }
+  }
+  this.publish('error', err && err.reason ? err.reason : err);
+});
+
 
 process.on('uncaughtException', function (err) {
   console.error((new Date).toUTCString() + ' uncaughtException:', err.message)
