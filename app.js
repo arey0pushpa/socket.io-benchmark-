@@ -1,9 +1,5 @@
 
-var profiler = require('v8-profiler');
 var io = require('socket.io').listen(3000);
-var exec = require('child_process').exec; 
-
-
 var RedisStore = require('socket.io/lib/stores/redis')
   , redis  = require('socket.io/node_modules/redis')
   , pub    = redis.createClient()
@@ -15,14 +11,16 @@ io.set('store', new RedisStore({
 , redisSub : sub
 , redisClient : client
 }));
+  
 
+var profiler = require('v8-profiler');
 
-var io = require('socket.io').listen(80);
+var exec = require('child_process').exec; 
 
 io.configure('production', function(){
   io.enable('browser client etag');
   io.set('log level', 1);
-
+  var transport = process.argv.length >= 2 ? process.argv[2] : null;
   io.set('transports', [
     'websocket'
   , 'flashsocket'
@@ -45,10 +43,11 @@ io.configure(function() {
     io.set('transports', [transport]);
   }
 });
+
 */
 
-
 // command to read process consumed memory and cpu time
+
 var getCpuCommand = "ps -p " + process.pid + " -u | grep " + process.pid;
 
 var users = 0;
@@ -67,17 +66,18 @@ setInterval(function() {
   var msuSended = (users > 0 ? auxSended : 0);
 
   // call a system command (ps) to get current process resources utilization
+  
   var child = exec(getCpuCommand, function(error, stdout, stderr) {
     var s = stdout.split(/\s+/);
     var cpu = s[2];
     var memory = s[3];
 
     var l = [
-      'U: ' + users,
-      'MR/S: ' + countReceived,
-      'MS/S: ' + countSended,
-      'MR/S/U: ' + msuReceived,
-      'MS/S/U: ' + msuSended,
+      'Users: ' + users,
+      'Msg Rcvd / S: ' + countReceived,
+      'Msg Sent / S: ' + countSended,
+      //'Msg Rcv / S/U: ' + msuReceived,
+      //'MS/S/U: ' + msuSended,
       'CPU: ' + cpu,
       'Mem: ' + memory
     ];
@@ -87,10 +87,10 @@ setInterval(function() {
     countSended = 0;
   });
 
-}, 1000);
+}, 5000);
 
 io.sockets.on('connection', function(socket) {
-
+  console.log('got socket.io connection - id: %s', socket.id);
   users++;
 
   socket.on('message', function(message) {
@@ -110,7 +110,9 @@ io.sockets.on('connection', function(socket) {
 
   socket.on('disconnect', function() {
     users--;
-   console.log( " \nThe client " + users + " of process id " + process.pid + " is being disconnected . Trying to reconnect shortly. "); 
+   console.log( " \nThe client " + users + " of process id " + process.pid + " is being disconnected . Trying to reconnect shortly.\n "); 
+  socket.disconnect();
+  socket.socket.reconnect() || socket.socket.connect(host);
   });
 
 socket.on('error',  function (err) {

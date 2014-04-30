@@ -76,5 +76,3 @@ TODO/Brainstorm:
 Might also use cluster to gain the full processor utilisation. And socket.io clusterhub too.
 
 Tested with node v0.10.15
-
-Added RedisStore support but cause lower benchmark output.
