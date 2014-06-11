@@ -15,7 +15,7 @@ There are two tests you can run:
 
 
 Instalation:
-1) 'git clone git@github.com:michetti/socket.io-benchmark.git'
+1) 'git clone https://github.com/arey0pushpa/socket.io-benchmark-.git"
 2) on created dir, 'npm install -d'
 3) set ulimit 'ulimit -u <desired ulimit>'
     
